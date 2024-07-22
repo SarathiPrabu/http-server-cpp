@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
       std::cout << "URI: " << uri << std::endl;
       std::cout << "Version: " << version << std::endl;
 
-      if(uri == "/index.html")
+      if(uri == "/")
       {
         std::string success_message = "HTTP/1.1 200 OK\r\n\r\n";
         send(client_fd, success_message.c_str(), success_message.length(), 0);
