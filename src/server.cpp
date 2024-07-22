@@ -8,6 +8,19 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include <sstream>
+#include <vector>
+
+std::vector<std::string> split(const std::string &str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(str);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
 int main(int argc, char **argv) {
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
@@ -56,11 +69,50 @@ int main(int argc, char **argv) {
   int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
   std::cout << "Client connected\n";
   
-  std::string success_message = "HTTP/1.1 200 OK\r\n\r\n";
-  send(client_fd, success_message.c_str(), success_message.length(), 0);
+  
+  // Receive data from the client
+  char buffer[4096] = {0};
+  int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
+  if (bytes_read < 0) {
+      perror("recv");
+      close(client_fd);
+      close(server_fd);
+      exit(EXIT_FAILURE);
+  }
+
+  std::string request(buffer);
+  std::cout << "Received request:\n" << request << std::endl;
+  
+  std::istringstream requestStream(request);
+  std::string requestLine;
+  std::getline(requestStream, requestLine);
+
+  std::vector<std::string> requestParts = split(requestLine, ' ');
+  if (requestParts.size() >= 3) {
+      std::string method = requestParts[0];
+      std::string uri = requestParts[1];
+      std::string version = requestParts[2];
+
+      std::cout << "Method: " << method << std::endl;
+      std::cout << "URI: " << uri << std::endl;
+      std::cout << "Version: " << version << std::endl;
+
+      if(uri == "/index.html")
+      {
+        std::string success_message = "HTTP/1.1 200 OK\r\n\r\n";
+        send(client_fd, success_message.c_str(), success_message.length(), 0);
+      }
+      else{
+        std::string success_message = "HTTP/1.1 404 Not Found\r\n\r\n";
+        send(client_fd, success_message.c_str(), success_message.length(), 0);
+      }
+  } else {
+      std::cerr << "Invalid request line" << std::endl;
+  }
+
+  
   
   close(client_fd);
-  
   close(server_fd);
 
   return 0;
