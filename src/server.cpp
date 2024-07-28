@@ -98,23 +98,27 @@ int main(int argc, char **argv) {
       // std::cout << "Version: " << version << std::endl;
 
       if(method == "GET"){
-        std::string success_message = "HTTP/1.1 200 OK\r\n";
+        std::string response_header = "HTTP/1.1 200 OK\r\n";
         if(uri == "/")
         {
-          success_message += "\r\n";
-          send(client_fd, success_message.c_str(), success_message.length(), 0);
+          response_header += "\r\n";
+          send(client_fd, response_header.c_str(), response_header.length(), 0);
         }
         std::vector<std::string> path = split(uri,'/');
         if(path[1] == "echo"){
           std::string content = path[2];
           std::string content_type = "Content-Type: text/plain\r\n";
           std::string content_length = "Content-Length: "+ std::to_string(content.size()) +"\r\n\r\n";
-          std::string response = success_message +
+          std::string response = response_header +
                                   content_type +
                                   content_length +
                                   content;
           std::cout << "\nRESPONSE\n" << response << std::endl;
           send(client_fd, response.c_str(), response.length(), 0);
+        }
+        else{
+          response_header = "HTTP/1.1 404 Not Found\r\n\r\n";
+          send(client_fd, response_header.c_str(), response_header.length(), 0);
         }
     } else {
         std::cerr << "Invalid request line" << std::endl;
