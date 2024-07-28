@@ -10,6 +10,7 @@
 
 #include <sstream>
 #include <vector>
+#include <map>
 
 std::vector<std::string> split(const std::string &str, char delimiter) {
     std::vector<std::string> tokens;
@@ -19,6 +20,26 @@ std::vector<std::string> split(const std::string &str, char delimiter) {
         tokens.push_back(token);
     }
     return tokens;
+}
+
+std::string trim(const std::string& str) {
+    size_t start = str.find_first_not_of(" \t\n\r");
+    size_t end = str.find_last_not_of(" \t\n\r");
+    return (start == std::string::npos || end == std::string::npos) ? "" : str.substr(start, end - start + 1);
+}
+
+std::map<std::string, std::string> parseHeader(std::istringstream& requestStream) {
+    std::map<std::string, std::string> headers;
+    std::string line;
+    while (std::getline(requestStream, line) && line != "\r" && !line.empty()) {
+        size_t pos = line.find(':');
+        if (pos != std::string::npos) {
+            std::string key = trim(line.substr(0, pos));
+            std::string value = trim(line.substr(pos + 1));            
+            headers[key] = value;
+        }
+    }
+    return headers;
 }
 
 int main(int argc, char **argv) {
@@ -92,40 +113,55 @@ int main(int argc, char **argv) {
       std::string method = requestParts[0];
       std::string uri = requestParts[1];
       std::string version = requestParts[2];
-
+      std::vector<std::string> path = split(uri,'/');
       // std::cout << "Method: " << method << std::endl;
       // std::cout << "URI: " << uri << std::endl;
       // std::cout << "Version: " << version << std::endl;
-
+      std::string response_line = "HTTP/1.1 200 OK\r\n";
+      std::string content_type_text = "Content-Type: text/plain\r\n";
+      std::string content_length = "Content-Length: ";
+      std::string content;
+      std::string response;
       if(method == "GET"){
-        std::string response_header = "HTTP/1.1 200 OK\r\n";
+        
         if(uri == "/")
         {
-          response_header += "\r\n";
-          send(client_fd, response_header.c_str(), response_header.length(), 0);
-        }
-        std::vector<std::string> path = split(uri,'/');
-        if(path[1] == "echo"){
-          std::string content = path[2];
-          std::string content_type = "Content-Type: text/plain\r\n";
-          std::string content_length = "Content-Length: "+ std::to_string(content.size()) +"\r\n\r\n";
-          std::string response = response_header +
-                                  content_type +
-                                  content_length +
-                                  content;
+          response_line += "\r\n";
+          send(client_fd, response_line.c_str(), response_line.length(), 0);
+          close(client_fd);
+        } else if(uri == "/user-agent"){
+          std::map<std::string, std::string> headers = parseHeader(requestStream);
+          content = headers["User-Agent"];
+          content_length += std::to_string(content.size()) +"\r\n\r\n";
+          response  = response_line +
+                      content_type_text +
+                      content_length +
+                      content;
           std::cout << "\nRESPONSE\n" << response << std::endl;
           send(client_fd, response.c_str(), response.length(), 0);
-        }
-        else{
-          response_header = "HTTP/1.1 404 Not Found\r\n\r\n";
-          send(client_fd, response_header.c_str(), response_header.length(), 0);
+          close(client_fd);
+        } else if(path[1] == "echo"){
+          content = path[2];
+          content_length += std::to_string(content.size()) +"\r\n\r\n";
+          response  = response_line +
+                      content_type_text +
+                      content_length +
+                      content;
+
+          std::cout << "\nRESPONSE\n" << response << std::endl;
+          send(client_fd, response.c_str(), response.length(), 0);
+          close(client_fd);
+        } else{
+          response_line = "HTTP/1.1 404 Not Found\r\n\r\n";
+          send(client_fd, response_line.c_str(), response_line.length(), 0);
+          close(client_fd);
         }
     } else {
         std::cerr << "Invalid request line" << std::endl;
     }
     
   }
-close(client_fd);
+
 close(server_fd);
 return 0;
 }
