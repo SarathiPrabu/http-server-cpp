@@ -93,27 +93,35 @@ int main(int argc, char **argv) {
       std::string uri = requestParts[1];
       std::string version = requestParts[2];
 
-      std::cout << "Method: " << method << std::endl;
-      std::cout << "URI: " << uri << std::endl;
-      std::cout << "Version: " << version << std::endl;
+      // std::cout << "Method: " << method << std::endl;
+      // std::cout << "URI: " << uri << std::endl;
+      // std::cout << "Version: " << version << std::endl;
 
-      if(uri == "/")
-      {
-        std::string success_message = "HTTP/1.1 200 OK\r\n\r\n";
-        send(client_fd, success_message.c_str(), success_message.length(), 0);
-      }
-      else{
-        std::string success_message = "HTTP/1.1 404 Not Found\r\n\r\n";
-        send(client_fd, success_message.c_str(), success_message.length(), 0);
-      }
-  } else {
-      std::cerr << "Invalid request line" << std::endl;
+      if(method == "GET"){
+        std::string success_message = "HTTP/1.1 200 OK\r\n";
+        if(uri == "/")
+        {
+          success_message += "\r\n";
+          send(client_fd, success_message.c_str(), success_message.length(), 0);
+        }
+        std::vector<std::string> path = split(uri,'/');
+        if(path[1] == "echo"){
+          std::string content = path[2];
+          std::string content_type = "Content-Type: text/plain\r\n";
+          std::string content_length = "Content-Length: "+ std::to_string(content.size()) +"\r\n\r\n";
+          std::string response = success_message +
+                                  content_type +
+                                  content_length +
+                                  content;
+          std::cout << "\nRESPONSE\n" << response << std::endl;
+          send(client_fd, response.c_str(), response.length(), 0);
+        }
+    } else {
+        std::cerr << "Invalid request line" << std::endl;
+    }
+    
   }
-
-  
-  
-  close(client_fd);
-  close(server_fd);
-
-  return 0;
+close(client_fd);
+close(server_fd);
+return 0;
 }
