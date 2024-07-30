@@ -158,9 +158,8 @@ void handleClient(int client_fd)
         // std::string uri = requestParts[1];
         // std::map<std::string, std::string> headers = parseHeader(requestStream);
         // std::string response = handleRequest(method, uri, headers);
-        std::string response = "HTTP/1.1 200 OK\r\n";
+        std::string response = "HTTP/1.1 200 OK\r\n\r\n";
         send(client_fd, response.c_str(), response.length(), 0);
-        
         close(client_fd);
     }
     
