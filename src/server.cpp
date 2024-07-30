@@ -144,21 +144,21 @@ void handleClient(int client_fd)
             close(client_fd);
             return;
         }
-        // std::istringstream requestStream(buffer);
-        // std::string requestLine;
-        // std::getline(requestStream, requestLine);
-        // std::vector<std::string> requestParts = split(requestLine, ' ');
-        // if (requestParts.size() < 3)
-        // {
-        //     std::cerr << "Invalid request line\n";
-        //     close(client_fd);
-        //     return;
-        // }
-        // std::string method = requestParts[0];
-        // std::string uri = requestParts[1];
-        // std::map<std::string, std::string> headers = parseHeader(requestStream);
-        // std::string response = handleRequest(method, uri, headers);
-        std::string response = "HTTP/1.1 200 OK\r\n\r\n";
+        std::istringstream requestStream(buffer);
+        std::string requestLine;
+        std::getline(requestStream, requestLine);
+        std::vector<std::string> requestParts = split(requestLine, ' ');
+        if (requestParts.size() < 3)
+        {
+            std::cerr << "Invalid request line\n";
+            close(client_fd);
+            return;
+        }
+        std::string method = requestParts[0];
+        std::string uri = requestParts[1];
+        std::map<std::string, std::string> headers = parseHeader(requestStream);
+        std::string response = handleRequest(method, uri, headers);
+        std::cout << "Response for client " << active_connections << " \n" << response << std::endl;
         send(client_fd, response.c_str(), response.length(), 0);
         close(client_fd);
     }
