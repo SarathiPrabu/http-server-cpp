@@ -129,6 +129,15 @@ std::string handleRequest(const std::string &method, const std::string &uri, con
     return response_line + content_type + content_length + content;
 }
 
+void simulateWork(int seconds) {
+    auto start = std::chrono::steady_clock::now();
+    while (std::chrono::duration_cast<std::chrono::seconds>(
+               std::chrono::steady_clock::now() - start).count() < seconds) {
+        // Simulate CPU-intensive work
+        for (volatile int i = 0; i < 1000000; ++i) {}
+    }
+}
+
 void handleClient(int client_fd)
 {
     active_connections++;
@@ -159,6 +168,7 @@ void handleClient(int client_fd)
         std::map<std::string, std::string> headers = parseHeader(requestStream);
         std::string response = handleRequest(method, uri, headers);
         send(client_fd, response.c_str(), response.length(), 0);
+        simulateWork(2);
         close(client_fd);
     }
     active_connections--;
