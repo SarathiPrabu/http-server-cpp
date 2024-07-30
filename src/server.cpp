@@ -129,21 +129,12 @@ std::string handleRequest(const std::string &method, const std::string &uri, con
     return response_line + content_type + content_length + content;
 }
 
-void simulateWork(int seconds) {
-    auto start = std::chrono::steady_clock::now();
-    while (std::chrono::duration_cast<std::chrono::seconds>(
-               std::chrono::steady_clock::now() - start).count() < seconds) {
-        // Simulate CPU-intensive work
-        for (volatile int i = 0; i < 1000000; ++i) {}
-    }
-}
-
 void handleClient(int client_fd)
 {
     active_connections++;
     {
         std::lock_guard<std::mutex> lock(cout_mutex);
-        std::cout << "New client connected. Active connections: " << active_connections << std::endl;
+        // std::cout << "New client connected. Active connections: " << active_connections << std::endl;
 
         char buffer[4096] = {0};
         int bytes_read = recv(client_fd, buffer, sizeof(buffer), 0);
@@ -153,30 +144,26 @@ void handleClient(int client_fd)
             close(client_fd);
             return;
         }
-        std::istringstream requestStream(buffer);
-        std::string requestLine;
-        std::getline(requestStream, requestLine);
-        std::vector<std::string> requestParts = split(requestLine, ' ');
-        if (requestParts.size() < 3)
-        {
-            std::cerr << "Invalid request line\n";
-            close(client_fd);
-            return;
-        }
-        std::string method = requestParts[0];
-        std::string uri = requestParts[1];
-        std::map<std::string, std::string> headers = parseHeader(requestStream);
-        std::string response = handleRequest(method, uri, headers);
+        // std::istringstream requestStream(buffer);
+        // std::string requestLine;
+        // std::getline(requestStream, requestLine);
+        // std::vector<std::string> requestParts = split(requestLine, ' ');
+        // if (requestParts.size() < 3)
+        // {
+        //     std::cerr << "Invalid request line\n";
+        //     close(client_fd);
+        //     return;
+        // }
+        // std::string method = requestParts[0];
+        // std::string uri = requestParts[1];
+        // std::map<std::string, std::string> headers = parseHeader(requestStream);
+        // std::string response = handleRequest(method, uri, headers);
+        std::string response = "HTTP/1.1 200 OK\r\n";
         send(client_fd, response.c_str(), response.length(), 0);
-        simulateWork(2);
+        
         close(client_fd);
     }
-    active_connections--;
-
-    {
-        std::lock_guard<std::mutex> lock(cout_mutex);
-        std::cout << "Client disconnected. Active connections: " << active_connections << std::endl;
-    }
+    
 }
 
 // Main function
