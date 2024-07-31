@@ -95,6 +95,7 @@ void listenForConnections(int server_fd, int backlog)
         throw std::runtime_error("listen failed");
     }
 }
+
 std::optional<std::string> readFile(const std::string& filename)
 {
     std::cout << "Directory : " << dir << std::endl;
@@ -102,12 +103,9 @@ std::optional<std::string> readFile(const std::string& filename)
     
     if (fstrm)
     {
-        std::string contents, line;
-        while (std::getline(fstrm, line))
-        {
-            contents += line + '\n';
-        }
-        fstrm.close();
+        std::stringstream buffer;
+        buffer << fstrm.rdbuf(); 
+        std::string contents = buffer.str(); 
         return contents;
     }
     else
