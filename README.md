@@ -1,39 +1,29 @@
-[![progress-banner](https://backend.codecrafters.io/progress/http-server/873538ab-099d-4124-982e-d764e2637c89)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# C++ Socket Programming Server
 
-This is a starting point for C++ solutions to the
-["Build Your Own HTTP server" Challenge](https://app.codecrafters.io/courses/http-server/overview).
+This repository is my personal project to learn about socket programming and deepen my knowledge of C++. The project focuses on building a custom server using C++ to explore and understand the fundamentals of socket programming, enabling efficient communication between devices over a network. The server is designed to handle multiple client connections concurrently, demonstrating basic concepts such as socket creation, binding, listening, and data transmission. This project also includes the use of modern C++ features.
 
-[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) is the
-protocol that powers the web. In this challenge, you'll build a HTTP/1.1 server
-that is capable of serving multiple clients.
+## Features
+- **Socket Creation**: Establish and configure server sockets.
+- **Concurrent Connections**: Handle multiple client connections concurrently, showcasing efficient multithreading techniques.
+- **Data Transmission**: Send and receive messages between server and clients.
+- **Error Handling**: Implement basic error checking and handling for robustness.
+- **Modern C++ Features**: Utilizes `std::optional` for safe and expressive handling of optional values.
 
-Along the way you'll learn about TCP servers,
-[HTTP request syntax](https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html),
-and more.
+## Getting Started
+To get started, clone the repository and follow the instructions in the README to set up and run the server on your machine.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+## Prerequisites
+- Basic knowledge of C++ programming
+- Understanding of networking concepts
+- A compiler that supports C++11 or higher
 
-# Passing the first stage
+## How to Use
+1. Clone this repository.
+2. Compile the source code using your preferred C++ compiler.
+3. Run the server and connect clients to test the setup.
 
-The entry point for your HTTP server implementation is in `src/server.cpp`.
-Study and uncomment the relevant code, and push your changes to pass the first
-stage:
+## Contributing
+Feel free to open issues or submit pull requests if you have improvements or features to add.
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
-
-Time to move on to the next stage!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `cmake` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/server.cpp`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+## License
+This project is licensed under the MIT License.
