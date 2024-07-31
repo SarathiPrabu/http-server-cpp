@@ -192,7 +192,7 @@ void handleClient(int client_fd)
         std::string uri = requestParts[1];
         std::map<std::string, std::string> headers = parseHeader(requestStream);
         std::string response = handleRequest(method, uri, headers);
-        std::cout << "Response for client " << active_connections << " \n" << response << std::endl;
+        std::cout << "Response for client " << client_fd << " \n" << response << std::endl;
         send(client_fd, response.c_str(), response.length(), 0);
         close(client_fd);
     }
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
                 continue;
             }
 
-            std::cout << "Client connected" << std::endl;
+            std::cout << "Client : " << client_fd << std::endl;
             std::thread(handleClient, client_fd).detach();
         }
 
