@@ -18,6 +18,7 @@
 
 std::mutex cout_mutex;
 std::atomic<int> active_connections(0);
+std::string dir;
 
 // Utility functions
 std::vector<std::string> split(const std::string &str, char delimiter)
@@ -96,7 +97,9 @@ void listenForConnections(int server_fd, int backlog)
 }
 std::optional<std::string> readFile(const std::string& filename)
 {
-    std::fstream fstrm("/tmp/"+filename);
+    std::cout << "Directory : " << dir << std::endl;
+    std::fstream fstrm(dir+filename);
+    
     if (fstrm)
     {
         std::string contents, line;
@@ -199,8 +202,15 @@ void handleClient(int client_fd)
 }
 
 // Main function
-int main()
+int main(int argc, char **argv)
 {
+    
+    if(argc == 3 && strcmp(argv[1], "--directory")==0){
+        std::cout << "Arg 1 " << argv[0] << std::endl;
+        std::cout << "Arg 2 " << argv[1] << std::endl;
+        std::cout << "Arg 3 " << argv[2] << std::endl;
+        dir = argv[2];
+    }
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
     const int PORT = 4221;
@@ -210,7 +220,7 @@ int main()
         int server_fd = createServerSocket();
         bindServerSocket(server_fd, PORT);
         listenForConnections(server_fd, 5);
-        std::cout << "Server is listening on port "<< PORT ;
+        std::cout << "Server is listening on port "<< PORT << std::endl;
         while (true)
         {
             struct sockaddr_in client_addr;
@@ -223,7 +233,7 @@ int main()
                 continue;
             }
 
-            std::cout << "Client connected\n";
+            std::cout << "Client connected" << std::endl;
             std::thread(handleClient, client_fd).detach();
         }
 
