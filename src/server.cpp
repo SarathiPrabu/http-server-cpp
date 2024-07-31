@@ -13,6 +13,8 @@
 #include <map>
 #include <thread>
 #include <mutex>
+#include <fstream>
+#include <optional>
 
 std::mutex cout_mutex;
 std::atomic<int> active_connections(0);
@@ -92,9 +94,28 @@ void listenForConnections(int server_fd, int backlog)
         throw std::runtime_error("listen failed");
     }
 }
-
+std::optional<std::string> readFile(const std::string& filename)
+{
+    std::fstream fstrm("/tmp/"+filename);
+    if (fstrm)
+    {
+        std::string contents, line;
+        while (std::getline(fstrm, line))
+        {
+            contents += line + '\n';
+        }
+        fstrm.close();
+        return contents;
+    }
+    else
+    {
+        std::cerr << "Error opening the file: " << filename << std::endl;
+        return std::nullopt; 
+    }
+}
 // Request handling functions
-std::string handleRequest(const std::string &method, const std::string &uri, const std::map<std::string, std::string> &headers)
+std::string handleRequest(  const std::string &method, const std::string &uri, 
+                            const std::map<std::string, std::string> &headers   )
 {
     std::string response_line = "HTTP/1.1 200 OK\r\n";
     std::string content_type = "Content-Type: text/plain\r\n";
@@ -114,6 +135,18 @@ std::string handleRequest(const std::string &method, const std::string &uri, con
         else if (uri.substr(0, 6) == "/echo/")
         {
             content = uri.substr(6);
+        }
+        else if(uri.substr(0,7)=="/files/"){
+            content_type = "Content-Type: application/octet-stream\r\n";
+            auto fileContent = readFile(uri.substr(7));
+            if(fileContent)
+            {
+                content = *fileContent;
+            }
+            else
+            {
+                return "HTTP/1.1 404 Not Found\r\n\r\n";
+            }
         }
         else
         {
